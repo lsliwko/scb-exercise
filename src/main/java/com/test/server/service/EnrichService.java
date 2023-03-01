@@ -1,15 +1,11 @@
 package com.test.server.service;
 
 import com.test.server.exception.CsvException;
-import com.test.server.service.constraint.StrDateFormat;
+import com.test.server.service.model.CsvModel;
 import com.test.server.service.mapper.EnrichFieldMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.supercsv.cellprocessor.ParseDouble;
-import org.supercsv.cellprocessor.ParseLong;
-import org.supercsv.cellprocessor.constraint.StrRegEx;
-import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.exception.SuperCsvCellProcessorException;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.io.CsvMapWriter;
@@ -23,26 +19,17 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.*;
-import java.util.regex.Pattern;
 
 @Service
 public class EnrichService {
 
     final static private Logger logger = LoggerFactory.getLogger(EnrichService.class);
 
-    public static final CellProcessor[] TRADE_CSV_PROCESSORS = new CellProcessor[] {
-            new StrDateFormat("yyyyMMdd"), // date in 20221231 format
-            new ParseLong(), // product_id in number format
-            new StrRegEx("[A-Z]{3}"), // currency in three capital letters format
-            new ParseDouble(), // price
-    };
-
-
     //this method can be used to enrich wide variety of cvs types by providing different processors
     public void enrichCsv(
             Reader csvReader,
             Writer enrichedCsvWriter,
-            CellProcessor[] inputCsvProcessors,
+            CsvModel csvModel,
             EnrichFieldMapper enrichFieldMapper
     ) throws IOException, CsvException {
 
@@ -66,11 +53,11 @@ public class EnrichService {
             outputMapWriter.writeHeader(outputHeaders);
 
             Map<String, Object> inputValuesMap;
-            while (true) {
+            while (true) {  //while loop is v-fast (vs. streams)
 
                 //catch any parse exceptions
                 try {
-                    inputValuesMap = inputMapReader.read(inputHeaders, inputCsvProcessors);
+                    inputValuesMap = inputMapReader.read(inputHeaders, csvModel.getProcessors());
                 } catch (SuperCsvCellProcessorException e) {
                     logger.error(String.format(
                             "Error reading csv line no %d [%s]: %s",  inputMapReader.getLineNumber(), inputMapReader.getUntokenizedRow(), e.getMessage()),

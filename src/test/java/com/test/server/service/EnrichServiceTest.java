@@ -3,6 +3,7 @@ package com.test.server.service;
 import com.test.server.exception.CsvException;
 import com.test.server.service.mapper.EnrichFieldMapper;
 import com.test.server.service.mapper.ProductNameEnrichFieldMapper;
+import com.test.server.service.model.TradeCsvModel;
 import io.github.netmikey.logunit.api.LogCapturer;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public class EnrichServiceTest {
 
     @Autowired
     private EnrichService enrichService;
+
+    @Autowired
+    private TradeCsvModel tradeCsvModel;
 
     @RegisterExtension
     private LogCapturer logs = LogCapturer.create().captureForType(EnrichService.class);
@@ -115,7 +119,7 @@ public class EnrichServiceTest {
                 Reader reader = new InputStreamReader(new ByteArrayInputStream(inputCsv.getBytes()), StandardCharsets.UTF_8);
                 Writer writer = new OutputStreamWriter(outputCsv, StandardCharsets.UTF_8)
         ) {
-            enrichService.enrichCsv(reader, writer, EnrichService.TRADE_CSV_PROCESSORS, testEnrichFieldMapper);
+            enrichService.enrichCsv(reader, writer, tradeCsvModel, testEnrichFieldMapper);
         }
         return outputCsv.toString();
     }

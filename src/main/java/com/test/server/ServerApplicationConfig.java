@@ -49,7 +49,6 @@ public class ServerApplicationConfig {
         };
     };
 
-    //Note:
     private static Map<String, Product> loadProductMapFromResourceCsv(Resource csvResource) throws IOException {
         Map<String, Product> productsMap  = new HashMap<>();
 

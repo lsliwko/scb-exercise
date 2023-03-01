@@ -3,6 +3,7 @@ package com.test.server.controller;
 import com.test.server.exception.CsvException;
 import com.test.server.service.EnrichService;
 import com.test.server.service.mapper.ProductNameEnrichFieldMapper;
+import com.test.server.service.model.TradeCsvModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +19,15 @@ import java.nio.charset.StandardCharsets;
 @RestController
 @RequestMapping("/api/v1")
 public class EnrichController {
-    final static public String TEXT_CSV_VALUE  = "text/csv";
+    final static public String TEXT_CSV_VALUE  = "text/csv";    //Spring doesn't provide text/csv in MediaType
 
     final static private Logger logger = LoggerFactory.getLogger(EnrichController.class);
 
     @Autowired
     private ProductNameEnrichFieldMapper productNameEnrichFieldMapper;
+
+    @Autowired
+    private TradeCsvModel tradeCsvModel;
 
     @Autowired
     private EnrichService enrichService;
@@ -46,9 +50,9 @@ public class EnrichController {
                 Reader reader = new InputStreamReader(request.getInputStream(), request.getCharacterEncoding());
                 Writer writer = new OutputStreamWriter(response.getOutputStream(), request.getCharacterEncoding())
         ) {
-            enrichService.enrichCsv(reader, writer, enrichService.TRADE_CSV_PROCESSORS, productNameEnrichFieldMapper);
+            enrichService.enrichCsv(reader, writer, tradeCsvModel, productNameEnrichFieldMapper);
         } catch (IOException e) {
-            //critical error
+            //internal error
             logger.error("Error enriching trade csv (internal server error)", e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         } catch (CsvException e) {

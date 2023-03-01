@@ -83,7 +83,7 @@ public class EnrichControllerTest {
 
         HttpHeaders headers = new HttpHeaders();
 
-        if (mediaType!=null){
+        if (mediaType!=null) {
             headers.setContentType(mediaType);
             headers.setAccept(Collections.singletonList(mediaType));
         }
